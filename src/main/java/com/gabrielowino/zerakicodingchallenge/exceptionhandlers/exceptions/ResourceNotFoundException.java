@@ -4,10 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class InstitutionNotFoundException extends RuntimeException{
+public class ResourceNotFoundException extends RuntimeException{
 
-    public InstitutionNotFoundException(String registrationNumber) {
-        super("Unfortunately the Institution with the registration number " + registrationNumber +
+    public ResourceNotFoundException(String resource, String resourceIDName, String resourceID) {
+        super("Unfortunately the resource : " + resource + "  with " + resourceIDName + " : " + resourceID +
                 "could not be found.");
     }
 }
