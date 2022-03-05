@@ -31,7 +31,7 @@ public class Course {
     @Getter
     @Setter
     private Date endDate;
-    @ManyToMany(mappedBy = "enrolledCourses")
+    @ManyToMany
     private List<Student> enrolledStudents;
 
     public Course() {
