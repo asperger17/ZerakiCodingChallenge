@@ -1,9 +1,8 @@
 package com.gabrielowino.zerakicodingchallenge.controllers;
 
 import com.gabrielowino.zerakicodingchallenge.exceptionhandlers.exceptions.BadRequestException;
-import com.gabrielowino.zerakicodingchallenge.exceptionhandlers.exceptions.InstitutionNameAlreadyExistsException;
-import com.gabrielowino.zerakicodingchallenge.exceptionhandlers.exceptions.InstitutionNotFoundException;
-import com.gabrielowino.zerakicodingchallenge.exceptionhandlers.exceptions.InstitutionRegistrationNumberExistsException;
+import com.gabrielowino.zerakicodingchallenge.exceptionhandlers.exceptions.ResourceIDExistsException;
+import com.gabrielowino.zerakicodingchallenge.exceptionhandlers.exceptions.ResourceNotFoundException;
 import com.gabrielowino.zerakicodingchallenge.models.Institution;
 import com.gabrielowino.zerakicodingchallenge.repositories.InstitutionRepository;
 import org.springframework.web.bind.annotation.*;
@@ -40,16 +39,16 @@ public class InstitutionController {
 
     // Add a new institution
     @PostMapping("/institutions")
-    Institution addNewInstitution(Institution newInstitution){
+    Institution addNewInstitution(@RequestBody Institution newInstitution){
         // Check if institutions with the same registration number or name exist
         Optional<Institution> institution = institutionRepository.findById(newInstitution.getRegistrationNumber());
         if (!institution.isEmpty()){
-            throw new InstitutionRegistrationNumberExistsException(newInstitution.getRegistrationNumber());
+            throw new ResourceIDExistsException("Institution", "registrationNumber", newInstitution.getRegistrationNumber());
         }
         List<Institution> institutionList = institutionRepository.findByNameOfInstitution(
                 newInstitution.getNameOfInstitution());
         if (!institutionList.isEmpty()){
-            throw new InstitutionNameAlreadyExistsException(newInstitution.getNameOfInstitution());
+            throw new ResourceIDExistsException("Institution", "InstitutionName", newInstitution.getNameOfInstitution());
         }
         return institutionRepository.save(newInstitution);
     }
@@ -64,17 +63,17 @@ public class InstitutionController {
                 institution.setNameOfInstitution(nameOfInstitution);
                 return institutionRepository.save(institution);
             } else {
-                throw new InstitutionNameAlreadyExistsException(nameOfInstitution);
+                throw new ResourceIDExistsException("Institution", "InstitutionName", nameOfInstitution);
             }
         } else {
-            throw new InstitutionNotFoundException(registrationNumber);
+            throw new ResourceNotFoundException("Institution", "registrationNumber", registrationNumber);
         }
     }
 
     @GetMapping("/institutions/{registrationNumber}")
     Institution getInstitution(@PathVariable String registrationNumber){
         return institutionRepository.findById(registrationNumber).orElseThrow(
-                () -> new InstitutionNotFoundException(registrationNumber)
+                () -> new ResourceNotFoundException("Institution", "registrationNumber", registrationNumber)
         );
     }
 
