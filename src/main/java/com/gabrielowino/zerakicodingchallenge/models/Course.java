@@ -15,8 +15,10 @@ public class Course {
 
     @Id
     @Getter
+    @Setter
     private String courseID;
     @Getter
+    @Setter
     private String nameOfCourse;
     @Getter
     @Setter
@@ -32,6 +34,8 @@ public class Course {
     @Setter
     private Date endDate;
     @ManyToMany
+    @Getter
+    @Setter
     private List<Student> enrolledStudents;
 
     public Course() {

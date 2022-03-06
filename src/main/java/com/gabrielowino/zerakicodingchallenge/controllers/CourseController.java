@@ -7,6 +7,7 @@ import com.gabrielowino.zerakicodingchallenge.models.Course;
 import com.gabrielowino.zerakicodingchallenge.models.Institution;
 import com.gabrielowino.zerakicodingchallenge.repositories.CourseRepository;
 import com.gabrielowino.zerakicodingchallenge.repositories.InstitutionRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,7 +59,20 @@ public class CourseController {
 
     @DeleteMapping("/courses/{courseID}")
     void deleteCourse(@PathVariable String courseID){
-        courseRepository.deleteById(courseID);
+        Optional<Course> course = courseRepository.findById(courseID);
+        if (course.isEmpty()){
+            throw new ResourceNotFoundException("Course", "courseID", courseID);
+        }
+
+        // It makes more sense having the data that students are enrolled on a course as permanent than
+        // if (course.get().getEnrolledStudents().isEmpty()){
+        if (!course.get().getActive()) {
+            courseRepository.deleteById(courseID);
+        } else {
+            // TODO: create a proper exception for not deleting active courses
+            throw new RuntimeException("Unable to delete this course as it has students enrolled in them ");
+        }
+
     }
 
     // Add a new course
@@ -76,6 +90,23 @@ public class CourseController {
                     newCourse.getInstitutionOfferingCourse().getRegistrationNumber()+newCourse.getNameOfCourse());
         }
         return courseRepository.save(newCourse);
+    }
+
+    @PutMapping("/courses/{courseID}")
+    Course editNameOfCourse(@PathVariable String courseID, @RequestParam String courseName) {
+        Optional<Course> course = courseRepository.findById(courseID);
+        if (course.isPresent()) {
+            List<Course> similarNamedCourses = courseRepository.findCoursesByNameOfCourse(courseName);
+            if (similarNamedCourses.isEmpty()) {
+                Course course1 = courseRepository.getById(courseID);
+                course1.setNameOfCourse(courseName);
+                return courseRepository.save(course1);
+            } else {
+                throw new ResourceIDExistsException("Course", "courseName", courseName);
+            }
+        } else {
+            throw new ResourceNotFoundException("Course", "courseID", courseID);
+        }
     }
 
 }
